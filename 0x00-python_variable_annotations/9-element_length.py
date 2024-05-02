@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-
+"""Task"""
 from typing import Iterable, List, Sequence, Tuple
-"""this function takes a list of sequences and returns
-list of tuples"""
 
 
 def element_length(lst: Iterable[Sequence]) -> List[Tuple[Sequence, int]]:
