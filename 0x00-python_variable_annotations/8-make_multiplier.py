@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+"""This module contains a function that takes a float and returns a function
+"""
 from typing import Callable
 
 
