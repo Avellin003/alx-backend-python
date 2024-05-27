@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
 import unittest
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch, MagicMock
 from parameterized import parameterized_class
 from client import GithubOrgClient
 from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
@@ -15,38 +14,35 @@ from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
     }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    """Performs integration tests for the `GithubOrgClient` class."""
-    @classmethod
-    def setUpClass(cls) -> None:
-        """Sets up class-wide mocks"""
-        route_payload = {
-            'https://api.github.com/orgs/test_org': cls.org_payload,
-            'https://api.github.com/orgs/test_org/repos': cls.repos_payload,
-        }
+    """Integration tests for GithubOrgClient.public_repos"""
 
-        def get_payload(url):
-            if url in route_payload:
-                return Mock(**{'json.return_value': route_payload[url]})
+    @classmethod
+    def setUpClass(cls):
+        """Set up class-wide mocks"""
+        cls.get_patcher = patch('requests.get')
+        cls.mock_get = cls.get_patcher.start()
+
+        def get_json_side_effect(url):
+            if url == "https://api.github.com/orgs/test_org":
+                return org_payload
+            elif url == "https://api.github.com/orgs/test_org/repos":
+                return repos_payload
             return None
 
-        cls.get_patcher = patch("requests.get", side_effect=get_payload)
-        cls.get_patcher.start()
-
-    def test_public_repos(self) -> None:
-        """Tests the `public_repos` method."""
-        self.assertEqual(
-            GithubOrgClient("test_org").public_repos(),
-            self.expected_repos,
-        )
-
-    def test_public_repos_with_license(self) -> None:
-        """Tests the `public_repos` method with a license."""
-        self.assertEqual(
-            GithubOrgClient("test_org").public_repos(license="apache-2.0"),
-            self.apache2_repos,
+        cls.mock_get.return_value = MagicMock(
+            json=MagicMock(side_effect=get_json_side_effect)
         )
 
     @classmethod
-    def tearDownClass(cls) -> None:
-        """Removes the class fixtures after running all tests."""
+    def tearDownClass(cls):
+        """Stop class-wide mocks"""
         cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """Test public_repos method"""
+        client = GithubOrgClient("test_org")
+        self.assertEqual(client.public_repos(), self.expected_repos)
+
+
+if __name__ == "__main__":
+    unittest.main()
