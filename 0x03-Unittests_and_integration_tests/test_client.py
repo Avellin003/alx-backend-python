@@ -1,19 +1,10 @@
 #!/usr/bin/env python3
 import unittest
 from unittest.mock import patch, MagicMock
-from parameterized import parameterized_class
 from client import GithubOrgClient
 from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
 
-@parameterized_class([
-    {
-        "org_payload": org_payload,
-        "repos_payload": repos_payload,
-        "expected_repos": expected_repos,
-        "apache2_repos": apache2_repos
-    }
-])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration tests for GithubOrgClient.public_repos"""
 
@@ -42,7 +33,14 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     def test_public_repos(self):
         """Test public_repos method"""
         client = GithubOrgClient("test_org")
-        self.assertEqual(client.public_repos(), self.expected_repos)
+        repos = client.public_repos()
+        self.assertEqual(repos, expected_repos)
+
+    def test_public_repos_with_license(self):
+        """Test public_repos method with license filter"""
+        client = GithubOrgClient("test_org")
+        repos = client.public_repos(license="apache-2.0")
+        self.assertEqual(repos, apache2_repos)
 
 
 if __name__ == "__main__":
