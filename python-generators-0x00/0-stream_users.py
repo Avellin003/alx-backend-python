@@ -3,7 +3,7 @@
 import MySQLdb
 
 
-def stream_users_generator():
+def stream_users():
     """
     Generator function that fetches rows one by one from the user_data table.
     Uses yield to return each row as it's fetched from the database.
@@ -43,7 +43,7 @@ def stream_users_generator():
 # Make the module callable by creating a class that implements __call__
 class StreamUsersModule:
     def __call__(self):
-        return stream_users_generator()
+        return stream_users()
 
 # Replace the current module with an instance of our callable class
 import sys
